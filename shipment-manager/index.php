@@ -60,90 +60,8 @@
                     </div>
                 </div>
 
-                <!-- Shipment Overview Cards -->
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="card bg-primary text-white">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h4 class="card-title">Total Orders</h4>
-                                        <h2 id="totalOrders">0</h2>
-                                    </div>
-                                    <div class="align-self-center">
-                                        <i class="fas fa-boxes fa-2x"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card bg-success text-white">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h4 class="card-title">Active Shipments</h4>
-                                        <h2 id="activeShipments">0</h2>
-                                    </div>
-                                    <div class="align-self-center">
-                                        <i class="fas fa-truck fa-2x"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card bg-warning text-white">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h4 class="card-title">Pending Orders</h4>
-                                        <h2 id="pendingOrders">0</h2>
-                                    </div>
-                                    <div class="align-self-center">
-                                        <i class="fas fa-clock fa-2x"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card bg-info text-white">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h4 class="card-title">Today's Capacity</h4>
-                                        <h2 id="todayCapacity">0%</h2>
-                                    </div>
-                                    <div class="align-self-center">
-                                        <i class="fas fa-percentage fa-2x"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Shipment Capacity Bars -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-truck"></i> Shipment Capacity
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div id="shipmentContainer">
-                                    <!-- Shipment bars will be dynamically generated here -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Holding Area -->
-                <div class="row mt-4">
+                <div class="row mb-4">
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header">
@@ -158,6 +76,88 @@
                                         <i class="fas fa-inbox fa-3x mb-3"></i><br>
                                         Drag orders here to temporarily hold them
                                     </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipment Capacity Bars -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-truck"></i> Shipments
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="shipmentContainer">
+                                    <!-- Shipment bars will be dynamically generated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipment Overview Cards -->
+                <div class="row">
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card bg-primary text-white stat-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title mb-1">Total Orders</h6>
+                                        <h4 id="totalOrders">0</h4>
+                                    </div>
+                                    <div class="text-opacity-50">
+                                        <i class="fas fa-boxes fa-lg"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card bg-success text-white stat-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title mb-1">Active Shipments</h6>
+                                        <h4 id="activeShipments">0</h4>
+                                    </div>
+                                    <div class="text-opacity-50">
+                                        <i class="fas fa-truck fa-lg"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card bg-warning text-white stat-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title mb-1">Pending Orders</h6>
+                                        <h4 id="pendingOrders">0</h4>
+                                    </div>
+                                    <div class="text-opacity-50">
+                                        <i class="fas fa-clock fa-lg"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card bg-info text-white stat-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title mb-1">Today's Capacity</h6>
+                                        <h4 id="todayCapacity">0%</h4>
+                                    </div>
+                                    <div class="text-opacity-50">
+                                        <i class="fas fa-percentage fa-lg"></i>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -304,6 +304,24 @@
                                         <h6 class="text-primary mb-3">
                                             <i class="fas fa-desktop"></i> Display Settings
                                         </h6>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Order Size Display Mode</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" id="displayByWeight" name="displayMode" value="weight" checked>
+                                                <label class="form-check-label" for="displayByWeight">
+                                                    Display by Weight
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" id="displayByVolume" name="displayMode" value="volume">
+                                                <label class="form-check-label" for="displayByVolume">
+                                                    Display by Volume
+                                                </label>
+                                            </div>
+                                            <div class="form-text">Choose how to size orders relative to shipment capacity</div>
+                                        </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-3">

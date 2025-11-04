@@ -8,9 +8,10 @@ class ShipmentManager {
         this.settings = {
             maxCapacity: 1000, // kg
             maxVolume: 10, // m³
-            upcomingShipments: 2
+            upcomingShipments: 2,
+            displayMode: 'weight' // 'weight' or 'volume'
         };
-        
+
         this.init();
     }
 
@@ -25,7 +26,7 @@ class ShipmentManager {
 
     // Load settings from localStorage or API
     loadSettings() {
-        const savedSettings = localStorage.getItem('shipmentSettings');
+        const savedSettings = localStorage.getItem('shipmentManagerSettings');
         if (savedSettings) {
             this.settings = { ...this.settings, ...JSON.parse(savedSettings) };
         }
@@ -388,6 +389,7 @@ class ShipmentManager {
         this.renderShipments();
         this.renderHoldingArea();
         this.updateStatistics();
+        this.initializeTooltips();
     }
 
     // Render shipments
@@ -410,13 +412,6 @@ class ShipmentManager {
     createShipmentElement(shipment) {
         const div = document.createElement('div');
         div.className = 'shipment-bar';
-        
-        const capacityPercentage = Math.round((shipment.currentCapacity / shipment.maxCapacity) * 100);
-        const volumePercentage = Math.round((shipment.currentVolume / shipment.maxVolume) * 100);
-        
-        let capacityClass = 'success';
-        if (capacityPercentage > 80) capacityClass = 'danger';
-        else if (capacityPercentage > 60) capacityClass = 'warning';
 
         div.innerHTML = `
             <div class="shipment-header">
@@ -428,28 +423,6 @@ class ShipmentManager {
                 </div>
             </div>
             <div class="shipment-content">
-                <div class="capacity-bar-container">
-                    <div class="capacity-label">
-                        <span>Weight Capacity</span>
-                        <span>${shipment.currentCapacity.toFixed(1)} / ${shipment.maxCapacity} kg</span>
-                    </div>
-                    <div class="capacity-bar">
-                        <div class="capacity-fill ${capacityClass}" style="width: ${capacityPercentage}%">
-                            <span class="capacity-text">${capacityPercentage}%</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="capacity-bar-container">
-                    <div class="capacity-label">
-                        <span>Volume Capacity</span>
-                        <span>${shipment.currentVolume.toFixed(2)} / ${shipment.maxVolume} m³</span>
-                    </div>
-                    <div class="capacity-bar">
-                        <div class="capacity-fill ${volumePercentage > 80 ? 'danger' : volumePercentage > 60 ? 'warning' : 'success'}" style="width: ${volumePercentage}%">
-                            <span class="capacity-text">${volumePercentage}%</span>
-                        </div>
-                    </div>
-                </div>
                 <div class="orders-container" data-shipment-id="${shipment.id}">
                     ${this.renderOrdersInShipment(shipment)}
                 </div>
@@ -462,29 +435,66 @@ class ShipmentManager {
     // Render orders in shipment
     renderOrdersInShipment(shipment) {
         if (shipment.orders.length === 0) {
-            return '<div class="empty-state"><i class="fas fa-box-open"></i><p>No orders assigned</p></div>';
+            return '<p class="text-muted text-center py-4"><i class="fas fa-box-open"></i> No orders assigned</p>';
         }
 
         return shipment.orders
             .sort((a, b) => b.priority - a.priority)
-            .map(order => this.createOrderElement(order))
+            .map(order => this.createOrderElement(order, shipment))
             .join('');
     }
 
     // Create order element
-    createOrderElement(order) {
+    createOrderElement(order, shipment = null) {
         const priorityClass = this.getPriorityClass(order.priority);
         const priorityText = this.getPriorityText(order.priority);
 
+        // Calculate percentage width based on displayMode
+        let percentageWidth = 2; // default fallback
+        if (shipment) {
+            let totalCapacity;
+            let orderSize;
+
+            if (this.settings.displayMode === 'weight') {
+                // Calculate total weight in shipment
+                totalCapacity = Array.isArray(shipment.orders)
+                    ? shipment.orders.reduce((sum, o) => sum + o.weight, 0)
+                    : 0;
+                orderSize = order.weight;
+            } else {
+                // Calculate total volume in shipment
+                totalCapacity = Array.isArray(shipment.orders)
+                    ? shipment.orders.reduce((sum, o) => sum + o.volume, 0)
+                    : 0;
+                orderSize = order.volume;
+            }
+
+            // Calculate percentage relative to total in shipment
+            if (totalCapacity > 0) {
+                percentageWidth = (orderSize / totalCapacity) * 100;
+            } else {
+                percentageWidth = 100 / (shipment.orders ? shipment.orders.length : 1);
+            }
+
+            // Round to 1 decimal place for better precision
+            percentageWidth = Math.round(percentageWidth * 10) / 10;
+        }
+        // Ensure at least 2% for visibility, but respect actual percentage if larger
+        percentageWidth = Math.max(2, percentageWidth);
+
+        // Create tooltip content
+        const tooltipContent = `Order #${order.orderId}<br>Customer: ${order.customerName}<br>Weight: ${order.weight}kg<br>Volume: ${order.volume}m³<br>Priority: ${priorityText}`;
+
         return `
-            <div class="order-item" draggable="true" data-order-id="${order.orderId}">
+            <div class="order-item" draggable="true" data-order-id="${order.orderId}" style="width: ${percentageWidth}%;"
+                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="${tooltipContent}">
                 <div class="order-header">
                     <span class="order-id">${order.orderId}</span>
                     <span class="order-priority ${priorityClass}">${priorityText}</span>
                 </div>
                 <div class="order-details">
                     <div><strong>${order.customerName}</strong></div>
-                    <div>${order.weight} kg | ${order.volume} m³</div>
+                    <div>${order.weight}kg | ${order.volume}m³</div>
                 </div>
                 <div class="order-actions">
                     <button class="btn btn-sm btn-danger delete-order" data-order-id="${order.orderId}">
@@ -499,7 +509,7 @@ class ShipmentManager {
     renderHoldingArea() {
         const container = document.getElementById('holdingArea');
         const countElement = document.getElementById('holdingCount');
-        
+
         countElement.textContent = this.holdingArea.length;
 
         if (this.holdingArea.length === 0) {
@@ -510,9 +520,15 @@ class ShipmentManager {
                 </p>
             `;
         } else {
+            // Create a virtual shipment object for sizing calculations in holding area
+            const holdingShipment = {
+                maxCapacity: this.settings.maxCapacity,
+                maxVolume: this.settings.maxVolume
+            };
+
             container.innerHTML = this.holdingArea
                 .sort((a, b) => b.priority - a.priority)
-                .map(order => this.createOrderElement(order))
+                .map(order => this.createOrderElement(order, holdingShipment))
                 .join('');
         }
 
@@ -536,6 +552,42 @@ class ShipmentManager {
             ? Math.round((totalCapacity / this.shipments.filter(s => s.status === 'pending').length) * 100)
             : 0;
         document.getElementById('todayCapacity').textContent = avgCapacity + '%';
+    }
+
+    // Initialize tooltips
+    initializeTooltips() {
+        // Destroy all existing tooltips first
+        const allTooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        allTooltips.forEach(el => {
+            const tooltip = bootstrap.Tooltip.getInstance(el);
+            if (tooltip) {
+                tooltip.hide();
+                tooltip.dispose();
+            }
+        });
+
+        // Clear any remaining tooltip elements
+        document.querySelectorAll('.tooltip').forEach(el => el.remove());
+
+        // Initialize new tooltips
+        setTimeout(() => {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(tooltipTriggerEl => {
+                // Create tooltip with proper options
+                new bootstrap.Tooltip(tooltipTriggerEl, {
+                    trigger: 'hover',
+                    delay: { show: 500, hide: 100 }
+                });
+
+                // Hide tooltip on drag start
+                tooltipTriggerEl.addEventListener('dragstart', () => {
+                    const tooltip = bootstrap.Tooltip.getInstance(tooltipTriggerEl);
+                    if (tooltip) {
+                        tooltip.hide();
+                    }
+                });
+            });
+        }, 50);
     }
 
     // Get priority class
@@ -589,5 +641,5 @@ class ShipmentManager {
 
 // Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new ShipmentManager();
+    window.shipmentManager = new ShipmentManager();
 }); 

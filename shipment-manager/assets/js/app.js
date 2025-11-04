@@ -140,6 +140,7 @@ class ShipmentManagerApp {
             maxCapacity: 1000,
             maxVolume: 10,
             upcomingShipments: 2,
+            displayMode: 'weight',
             ordersPerPage: 25,
             emailNotifications: true,
             capacityWarnings: true,
@@ -165,7 +166,15 @@ class ShipmentManagerApp {
         // Populate form fields with settings
         Object.keys(settings).forEach(key => {
             const element = document.getElementById(key);
-            if (element) {
+
+            // Handle radio buttons
+            const radioElements = document.querySelectorAll(`input[name="${key}"]`);
+            if (radioElements.length > 0) {
+                radioElements.forEach(radio => {
+                    radio.checked = radio.value === settings[key];
+                });
+            } else if (element) {
+                // Handle other input types
                 if (element.type === 'checkbox') {
                     element.checked = settings[key];
                 } else {
@@ -195,15 +204,26 @@ class ShipmentManagerApp {
             settings[checkbox.id] = checkbox.checked;
         });
 
+        // Handle radio buttons that weren't captured by FormData
+        form.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
+            settings[radio.name] = radio.value;
+        });
+
         // Store settings
         localStorage.setItem('shipmentManagerSettings', JSON.stringify(settings));
-        
+
         // Update last updated time
         document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
-        
+
+        // Reload ShipmentManager with new settings
+        if (window.shipmentManager) {
+            window.shipmentManager.loadSettings();
+            window.shipmentManager.renderDashboard();
+        }
+
         // Show success message
         this.showNotification('Settings saved successfully!', 'success');
-        
+
         // Close modal
         const modal = bootstrap.Modal.getInstance(document.getElementById('settingsModal'));
         modal.hide();
